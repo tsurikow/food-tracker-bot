@@ -1,10 +1,22 @@
-FROM python:3.10
+# Builder image
+FROM python:3.11 AS builder
+
+ENV PATH="/app/scripts:${PATH}"
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+ENV PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 WORKDIR /app
+ADD . /app
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+# Install project dependencies
+COPY --from=ghcr.io/astral-sh/uv:0.5.21 /uv /uvx /bin/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --no-install-project --no-dev
 
-COPY . .
-
-CMD ["python", "bot.py"]
+# Final image
+FROM builder AS final
+COPY --from=builder --chown=app:app /app /app
+ENV PATH="/app/.venv/bin:$PATH"
+RUN chmod +x scripts/*

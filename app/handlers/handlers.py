@@ -1,27 +1,34 @@
+import aiohttp
 from aiogram import Router
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from states.states import Form
-import aiohttp
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+
+from app.states.states import Form
 
 router = Router()
+
 
 # Обработчик команды /start
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    await message.reply("Добро пожаловать! Я ваш бот.\nВведите /help для списка команд.")
+    await message.reply(
+        "Добро пожаловать! Я ваш бот для учета калорийности еды.\nВведите /help для списка команд."
+    )
+
 
 # Обработчик команды /help
 @router.message(Command("help"))
 async def cmd_help(message: Message):
     await message.reply(
         "Доступные команды:\n"
-        "/start - Начало работы\n"
-        "/form - Пример диалога\n"
-        "/keyboard - Пример кнопок\n"
-        "/joke - Получить случайную шутку"
+        "/set_profile – настройка профиля"
+        "/log_water – логирование воды"
+        "/log_food – логирование еды"
+        "/log_workout <тип тренировки> <время (мин)> – логирование тренировок "
+        "/check_progress – прогресс по воде и калориям"
     )
+
 
 # Обработчик команды /keyboard с инлайн-кнопками
 @router.message(Command("keyboard"))
@@ -34,6 +41,7 @@ async def show_keyboard(message: Message):
     )
     await message.reply("Выберите опцию:", reply_markup=keyboard)
 
+
 @router.callback_query()
 async def handle_callback(callback_query):
     if callback_query.data == "btn1":
@@ -41,17 +49,20 @@ async def handle_callback(callback_query):
     elif callback_query.data == "btn2":
         await callback_query.message.reply("Вы нажали Кнопка 2")
 
+
 # FSM: диалог с пользователем
 @router.message(Command("form"))
 async def start_form(message: Message, state: FSMContext):
     await message.reply("Как вас зовут?")
     await state.set_state(Form.name)
 
+
 @router.message(Form.name)
 async def process_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await message.reply("Сколько вам лет?")
     await state.set_state(Form.age)
+
 
 @router.message(Form.age)
 async def process_age(message: Message, state: FSMContext):
@@ -61,6 +72,7 @@ async def process_age(message: Message, state: FSMContext):
     await message.reply(f"Привет, {name}! Тебе {age} лет.")
     await state.clear()
 
+
 # Получение шутки из API
 @router.message(Command("joke"))
 async def get_joke(message: Message):
@@ -68,6 +80,7 @@ async def get_joke(message: Message):
         async with session.get("https://api.chucknorris.io/jokes/random") as response:
             joke = await response.json()
             await message.reply(joke["value"])
+
 
 # Функция для подключения обработчиков
 def setup_handlers(dp):
