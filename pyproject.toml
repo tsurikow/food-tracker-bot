@@ -1,0 +1,51 @@
+[project]
+name = "food-tracker-bot"
+version = "0.1"
+description = "Aiogram 3.x Simple Food Tracker Bot"
+authors = ["Vitaly Tsurikov <vitsurikov@edu.hse.ru>"]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+repository = "https://github.com/tsurikow/food-tracker-bot"
+dependencies = [
+    "aiogram~=3.17.0",
+    "aiohttp~=3.11.11",
+    "python-dotenv~=1.0.1",
+    "pydantic>=2.4.1"
+]
+
+[project.urls]
+repository = "https://github.com/tsurikow/food-tracker-bot"
+
+[tool.uv]
+dev-dependencies = [
+    "ruff~=0.9.2"
+]
+
+[tool.black]
+line-length = 99
+exclude = "\\.?venv|\\.?tests"
+
+[tool.ruff]
+target-version = "py38"
+line-length = 99
+lint.select = [
+    "C",
+    "DTZ",
+    "E",
+    "F",
+    "I",
+    "ICN",
+    "N",
+    "PLC",
+    "PLE",
+    "Q",
+    "T",
+    "W",
+    "YTT",
+]
+lint.ignore = ["N805"]
+exclude = [
+    ".venv",
+    ".idea",
+]
