@@ -11,6 +11,7 @@ from database.db_commands import db_register_user
 
 router = Router(name="profile-router")
 
+
 # FSM: диалог с пользователем
 @router.message(Command("set_profile"))
 async def start_form(message: Message, state: FSMContext):
@@ -70,5 +71,5 @@ async def process_city(message: Message, state: FSMContext, session: AsyncSessio
     await db_register_user(
         name, age, weight, height, activity, city, water_goal, calorie_goal, message, session
     )
-    await message.reply(f"Информация сохранена в базу данных!")
+    await message.reply("Информация сохранена в базу данных!")
     await state.clear()

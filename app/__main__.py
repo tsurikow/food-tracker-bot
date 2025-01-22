@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.handlers import general, food, profile, progress, water, workout, advice
+from app.handlers import advice, food, general, profile, progress, water, workout
 from app.middlewares.middlewares import DbSessionMiddleware, LoggingMiddleware
 from config.config import DB_PATH, REDIS_URL, TOKEN
 

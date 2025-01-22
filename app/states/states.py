@@ -14,12 +14,15 @@ class Profile(StatesGroup):
     logged_calories = State()
     burned_calories = State()
 
+
 class Food(StatesGroup):
     name = State()
     weight = State()
 
+
 class Water(StatesGroup):
     volume = State()
+
 
 class Burn(StatesGroup):
     name = State()

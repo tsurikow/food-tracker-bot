@@ -2,7 +2,6 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-
 router = Router(name="general-router")
 
 
@@ -10,8 +9,7 @@ router = Router(name="general-router")
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     await message.reply(
-        "Добро пожаловать! Я ваш бот для учета калорийности еды.\n"
-        "Введите /help для списка команд."
+        "Добро пожаловать! Я ваш бот для учета калорийности еды.\nВведите /help для списка команд."
     )
 
 

@@ -1,8 +1,8 @@
 from aiogram import Router
+from aiogram.exceptions import AiogramError
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from aiogram.exceptions import AiogramError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.states.states import Burn
@@ -17,11 +17,13 @@ async def start_log_workout(message: Message, state: FSMContext):
     await message.reply("Каким видом тренировки вы занимались?")
     await state.set_state(Burn.name)
 
+
 @router.message(Burn.name)
 async def process_workout_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await message.reply("Сколько минут вы тренировались?")
     await state.set_state(Burn.time)
+
 
 @router.message(Burn.time)
 async def process_workout_time(message: Message, state: FSMContext, session: AsyncSession):
@@ -39,6 +41,6 @@ async def process_workout_time(message: Message, state: FSMContext, session: Asy
         await message.reply(f"Всего вы сожгли {log_workout} ккал")
         await db_update_burn_calories(log_workout, message, session)
     except AiogramError as e:
-        await message.reply('Не удалось получить информацию о тренировке!')
+        await message.reply("Не удалось получить информацию о тренировке!")
         await message.reply(e)
     await state.clear()
