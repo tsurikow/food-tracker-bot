@@ -73,7 +73,7 @@ async def get_gpt_advice(calories: int) -> str:
 
 
 async def get_gpt_result(msg: list) -> str:
-    sdk = AsyncYCloudML(folder_id="b1gmrgaed3h5d26s0a6r", auth="AQVN0h16bLShI3l7aMqXLRhG7Ll2RsavTgx_DsMP")
+    sdk = AsyncYCloudML(folder_id=GPT_FOLDER, auth=GPT_AUTH)
 
     model = sdk.models.completions("yandexgpt")
     model = model.configure(temperature=0.3)

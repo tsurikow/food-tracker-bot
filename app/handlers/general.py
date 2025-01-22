@@ -23,7 +23,7 @@ async def cmd_help(message: Message):
         "/set_profile – настройка профиля\n"
         "/log_water – логирование воды\n"
         "/log_food – логирование еды\n"
-        "/log_workout <тип тренировки> <время (мин)> – логирование тренировок\n"
+        "/log_workout – логирование тренировок\n"
         "/check_progress – прогресс по воде и калориям\n"
         "/recommend – рекомендация по питанию и тренировке\n"
     )
