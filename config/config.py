@@ -7,6 +7,8 @@ load_dotenv()
 
 # Чтение токена из переменной окружения
 TOKEN = os.getenv("BOT_TOKEN")
+GPT_AUTH = os.getenv("GPT_AUTH")
+GPT_FOLDER = os.getenv("GPT_FOLDER")
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
 REDIS_DB = os.getenv("REDIS_DB")

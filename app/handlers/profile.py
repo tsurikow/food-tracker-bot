@@ -1,4 +1,3 @@
-import aiohttp
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -7,31 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.states.states import Profile
 from app.utils.calculate import calculate_norm
+from app.utils.gpt import get_gpt_temp
 from database.db_commands import db_register_user
 
-router = Router()
-
-
-# Обработчик команды /start
-@router.message(Command("start"))
-async def cmd_start(message: Message):
-    await message.reply(
-        "Добро пожаловать! Я ваш бот для учета калорийности еды.\nВведите /help для списка команд."
-    )
-
-
-# Обработчик команды /help
-@router.message(Command("help"))
-async def cmd_help(message: Message):
-    await message.reply(
-        "Доступные команды:\n"
-        "/set_profile – настройка профиля\n"
-        "/log_water – логирование воды\n"
-        "/log_food – логирование еды\n"
-        "/log_workout <тип тренировки> <время (мин)> – логирование тренировок\n"
-        "/check_progress – прогресс по воде и калориям\n"
-    )
-
+router = Router(name="profile-router")
 
 # FSM: диалог с пользователем
 @router.message(Command("set_profile"))
@@ -85,23 +63,12 @@ async def process_city(message: Message, state: FSMContext, session: AsyncSessio
     height = int(data.get("height"))
     activity = int(data.get("activity"))
     city = data.get("city")
+    temp = await get_gpt_temp(city)
+    water_goal, calorie_goal = calculate_norm(age, weight, height, activity, temp)
     await message.reply(f"Профиль заполнен успешно, {name}!")
-    water_goal, calorie_goal = calculate_norm(age, weight, height, activity)
+    await message.reply(f"Текущая температура в {city}: {temp} градусов Цельсия")
     await db_register_user(
         name, age, weight, height, activity, city, water_goal, calorie_goal, message, session
     )
+    await message.reply(f"Информация сохранена в базу данных!")
     await state.clear()
-
-
-# Получение шутки из API
-@router.message(Command("joke"))
-async def get_joke(message: Message):
-    async with aiohttp.ClientSession() as session:
-        async with session.get("https://api.chucknorris.io/jokes/random") as response:
-            joke = await response.json()
-            await message.reply(joke["value"])
-
-
-# Функция для подключения обработчиков
-def setup_handlers(dp):
-    dp.include_router(router)

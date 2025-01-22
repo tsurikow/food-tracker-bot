@@ -1,21 +1,9 @@
 from aiogram.types import Message
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.user import User
-
-
-async def db_add_to_db(item, message: Message, session: AsyncSession):
-    session.add(item)
-    try:
-        await session.commit()
-        await session.refresh(item)
-        return item
-    except IntegrityError as ex:
-        await session.rollback()
-        await message.answer("DB error!")
-        await message.answer(ex)
 
 
 async def db_register_user(
@@ -56,16 +44,116 @@ async def db_register_user(
         return True
     except IntegrityError as ex:
         await session.rollback()
-        await message.answer("DB error!")
-        await message.answer(ex.args[0])
+        await message.answer("Не удалось сохранить профиль!\n"
+                             "Возможно, профиль уже зарегистрирован.")
         return False
 
 
-async def db_get_all_users(message: Message, session: AsyncSession):
-    sql = select(User)
-    users_sql = await session.execute(sql)
-    users = users_sql.scalars()
+async def db_update_burn_calories(burn_calories, message: Message, session: AsyncSession):
 
-    users_list = "\n".join([f"{index + 1}. {item.tg_id}" for index, item in enumerate(users)])
+    await session.execute(update(User).where(User.tg_id == message.from_user.id).values(
+            burned_calories = User.burned_calories + int(burn_calories)))
 
-    return users_list
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось сохранить сожженные калории!\n"
+                             "Ошибка базы данных.")
+
+async def db_update_water_goal(add_water, message: Message, session: AsyncSession):
+
+    await session.execute(update(User).where(User.tg_id == message.from_user.id).values(
+            water_goal = User.water_goal + int(add_water)))
+
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Норма воды не была обновлена!\n"
+                             "Ошибка базы данных.")
+
+
+async def db_update_log_food(log_calories, message: Message, session: AsyncSession):
+
+    await session.execute(update(User).where(User.tg_id == message.from_user.id).values(
+            logged_calories = User.logged_calories + int(log_calories)))
+
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось сохранить потребленные калории!\n"
+                             "Ошибка базы данных.")
+
+async def db_update_log_water(log_water, message: Message, session: AsyncSession):
+
+    await session.execute(update(User).where(User.tg_id == message.from_user.id).values(
+            logged_water = User.logged_water + int(log_water)))
+
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось сохранить выпитую воду!\n"
+                             "Ошибка базы данных.")
+
+async def db_get_water_goal(message: Message, session: AsyncSession):
+
+    water_goal = await session.execute(select(User.water_goal).where(User.tg_id == message.from_user.id))
+
+    try:
+        await session.commit()
+        return water_goal.scalar()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось загрузить вашу норму!\n"
+                             "Ошибка базы данных.")
+
+async def db_get_logged_water(message: Message, session: AsyncSession):
+
+    logged_water = await session.execute(select(User.logged_water).where(User.tg_id == message.from_user.id))
+
+    try:
+        await session.commit()
+        return logged_water.scalar()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось загрузить выпитую воду!\n"
+                             "Ошибка базы данных.")
+
+async def db_get_calorie_goal(message: Message, session: AsyncSession):
+
+    calorie_goal = await session.execute(select(User.calorie_goal).where(User.tg_id == message.from_user.id))
+
+    try:
+        await session.commit()
+        return calorie_goal.scalar()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось загрузить цель по калориям!\n"
+                             "Ошибка базы данных.")
+
+async def db_get_logged_calories(message: Message, session: AsyncSession):
+
+    logged_calories = await session.execute(select(User.logged_calories).where(User.tg_id == message.from_user.id))
+
+    try:
+        await session.commit()
+        return logged_calories.scalar()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось загрузить потребленные калории!\n"
+                             "Ошибка базы данных.")
+
+async def db_get_burned_calories(message: Message, session: AsyncSession):
+
+    burned_calories = await session.execute(select(User.burned_calories).where(User.tg_id == message.from_user.id))
+
+    try:
+        await session.commit()
+        return burned_calories.scalar()
+    except IntegrityError:
+        await session.rollback()
+        await message.answer("Не удалось загрузить сожженные калории!\n"
+                             "Ошибка базы данных.")
